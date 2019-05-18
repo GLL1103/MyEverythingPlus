@@ -1,0 +1,2 @@
+这是一个很不错的java版的Everything项目
+适用于Windows,Linux等各种操作平台
