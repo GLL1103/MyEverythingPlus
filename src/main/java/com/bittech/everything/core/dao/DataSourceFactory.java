@@ -30,7 +30,6 @@ public class DataSourceFactory {
                     //获取当前工程路径
                     String workDir = System.getProperty("user.dir");
 
-                    //JDBC规范中关于mysql  jdbc:mysql:/
                     //JDBC规范中关于H2  jdbc:h2:filepath -> 存储到本地文件
                     //JDBC规范中关于H2  jdbc:h2://ip:port/databaseName  -> 存储到服务器
                     dataSource.setUrl("jdbc:h2:"+workDir+ File.separator+"my_everything_plus");
@@ -76,13 +75,14 @@ public class DataSourceFactory {
             statement.close();
         }
         catch(IOException e) {
-
+            e.printStackTrace();
         }
         catch(SQLException e) {
             e.printStackTrace();
         }
 
     }
+
 }
 
 
