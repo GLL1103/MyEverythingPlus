@@ -18,7 +18,7 @@ public class FileSearchImpl implements FileSearch {
      */
 
     private final FileIndexDao fileIndexDao;
-    private FileSearchImpl(FileIndexDao fileIndexDao) {
+    public FileSearchImpl(FileIndexDao fileIndexDao) {
         this.fileIndexDao = fileIndexDao;
     }
 

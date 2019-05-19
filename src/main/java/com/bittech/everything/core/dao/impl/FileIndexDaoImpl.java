@@ -73,9 +73,14 @@ public class FileIndexDaoImpl implements FileIndexDao {
             if(condition.getFileType() != null) {
                 sqlBuilder.append(" and file_type = '").append(condition.getFileType().toUpperCase()).append("' ");
             }
-            //limit   order  必选
-            sqlBuilder.append(" order by depath ").append(condition.getOrderByAsc() ? "asc" : "desc" );
-            sqlBuilder.append(" limit ").append(condition.getLimit()).append(" offset 0 ");
+            //limit   order
+            if(condition.getOrderByAsc() != null) {
+                sqlBuilder.append(" order by depath ").append(condition.getOrderByAsc() ? "asc" : "desc" );
+            }
+            if(condition.getLimit() != null) {
+                sqlBuilder.append(" limit ").append(condition.getLimit()).append(" offset 0 ");
+            }
+
 
             //打印SQL 语句
             System.out.println(sqlBuilder);
