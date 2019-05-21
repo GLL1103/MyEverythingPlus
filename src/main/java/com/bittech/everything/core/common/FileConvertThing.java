@@ -23,11 +23,8 @@ public final class FileConvertThing {
 
     //获取文件深度
     private static int computeFileDepath(File file) {
-        int dept = 0;
         String[] message = file.getAbsolutePath().split("\\\\");
-        dept = message.length -1;
-
-        return dept;
+        return message.length -1;
     }
 
     //获取文件类型

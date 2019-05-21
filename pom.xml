@@ -34,7 +34,10 @@
         <java.version>1.8</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
+
+        <h2.version>1.4.196</h2.version>
     </properties>
+
 
     <!--项目依赖-->
     <dependencies>

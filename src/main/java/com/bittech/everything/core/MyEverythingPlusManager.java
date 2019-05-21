@@ -6,12 +6,15 @@ import com.bittech.everything.core.dao.FileIndexDao;
 import com.bittech.everything.core.dao.impl.FileIndexDaoImpl;
 import com.bittech.everything.core.index.FileScan;
 import com.bittech.everything.core.index.impl.FileScanImpl;
+import com.bittech.everything.core.interceptor.impl.FileIndexInterceptor;
+import com.bittech.everything.core.interceptor.impl.FilePrintInterceptor;
 import com.bittech.everything.core.model.Condition;
 import com.bittech.everything.core.model.Thing;
 import com.bittech.everything.core.search.FileSearch;
 import com.bittech.everything.core.search.impl.FileSearchImpl;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -36,10 +39,36 @@ public class MyEverythingPlusManager {
     private void initComponent() {
         //数据源对象
         DataSource dataSource = DataSourceFactory.GetDataSource();
+
+        //检查数据库
+        checkDatabase();
         //业务层的对象
         FileIndexDao fileIndexDao = new FileIndexDaoImpl(dataSource);
         this.fileSearch = new FileSearchImpl(fileIndexDao);
         this.fileScan = new FileScanImpl();
+        //为了检查程序效果
+        //this.fileScan.interceptor(new FilePrintInterceptor());
+        this.fileScan.interceptor(new FileIndexInterceptor(fileIndexDao));
+    }
+
+//    private void checkDatabase() {
+//        String fileName = MyEverythingPlusConfig.getInstance().getH2IndexPath()+".mv.db";
+//        File dbFile = new File(fileName);
+//        if(dbFile.isFile() && !dbFile.exists()) {
+//            DataSourceFactory.initDatabase();
+//        }
+//    }
+    private void checkDatabase() {
+        String fileName = MyEverythingPlusConfig.getInstance().getH2IndexPath() + ".mv.db";
+        File dbFile = new File(fileName);
+        //初始化数据库
+        if (dbFile.exists() && dbFile.isDirectory()) {
+            throw new RuntimeException("The following path has the same folder as the database name, database creation failed!!\n"
+                    + MyEverythingPlusConfig.getInstance().getH2IndexPath() + ".mv.db\n"
+                    + "Please delete this folder and restart the program!");
+        } else if (!dbFile.exists()) {
+            DataSourceFactory.initDatabase();
+        }
     }
 
 

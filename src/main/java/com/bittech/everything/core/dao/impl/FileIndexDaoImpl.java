@@ -81,9 +81,6 @@ public class FileIndexDaoImpl implements FileIndexDao {
                 sqlBuilder.append(" limit ").append(condition.getLimit()).append(" offset 0 ");
             }
 
-
-            //打印SQL 语句
-            System.out.println(sqlBuilder);
             // 3.准备命令
             statement = connection.prepareStatement(sqlBuilder.toString());
             // 4.设置参数 1 2 3 4
@@ -138,24 +135,4 @@ public class FileIndexDaoImpl implements FileIndexDao {
         }
     }
 
-    public static void main(String[] args) {
-        FileIndexDao fileIndexDao = new FileIndexDaoImpl(DataSourceFactory.GetDataSource());
-
-        Thing thing = new Thing();
-        thing.setName("简历2.ppt");
-        thing.setPath("D:\\简历2.ppt");
-        thing.setDepath(1);
-        thing.setFileType(FileType.DOC);
-
-        fileIndexDao.insert(thing);
-        Condition condition = new Condition();
-        condition.setName("简历");
-        condition.setLimit(1);
-        condition.setOrderByAsc(true);
-        List<Thing> things = fileIndexDao.search(condition);
-
-        for(Thing t : things) {
-            System.out.println(t);
-        }
-    }
 }

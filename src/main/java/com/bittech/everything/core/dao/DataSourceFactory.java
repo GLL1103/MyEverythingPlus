@@ -1,13 +1,13 @@
 package com.bittech.everything.core.dao;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.bittech.everything.config.MyEverythingPlusConfig;
 
 import javax.sql.DataSource;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.SQLOutput;
 
 
 public class DataSourceFactory {
@@ -27,12 +27,11 @@ public class DataSourceFactory {
                     dataSource.setDriverClassName("org.h2.Driver");
                     //URL ， userName，password
                     //采用的是H2嵌入式数据库，数据库以本地文件的方式存储，只需提供URL接口
-                    //获取当前工程路径
-                    String workDir = System.getProperty("user.dir");
 
                     //JDBC规范中关于H2  jdbc:h2:filepath -> 存储到本地文件
+                    //JDBC规范中关于H2  jdbc:h2:~/filepath  -> 存储到当前用户的home目录
                     //JDBC规范中关于H2  jdbc:h2://ip:port/databaseName  -> 存储到服务器
-                    dataSource.setUrl("jdbc:h2:"+workDir+ File.separator+"my_everything_plus");
+                    dataSource.setUrl("jdbc:h2:"+MyEverythingPlusConfig.getInstance().getH2IndexPath());
                 }
             }
         }
@@ -43,6 +42,7 @@ public class DataSourceFactory {
     public static void initDatabase() {
         //1.获取数据源
         DataSource dataSource = DataSourceFactory.GetDataSource();
+        System.out.println(dataSource);
         //2.获取SQL语句
         //不采取读取绝对路径文件
         //采取读取classPath路径下的文件

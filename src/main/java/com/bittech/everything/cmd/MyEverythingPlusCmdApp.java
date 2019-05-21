@@ -2,7 +2,9 @@ package com.bittech.everything.cmd;
 
 import com.bittech.everything.core.MyEverythingPlusManager;
 import com.bittech.everything.core.model.Condition;
+import com.bittech.everything.core.model.Thing;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class MyEverythingPlusCmdApp {
@@ -74,7 +76,10 @@ public class MyEverythingPlusCmdApp {
         System.out.println("检索功能");
         //统一调度器中的search
         //name fileType limit orderByAsc
-        manager.search(condition);
+        List<Thing> things = manager.search(condition);
+        for(Thing thing : things) {
+            System.out.println(thing.getPath());
+        }
     }
 
     private static void index(MyEverythingPlusManager manager) {

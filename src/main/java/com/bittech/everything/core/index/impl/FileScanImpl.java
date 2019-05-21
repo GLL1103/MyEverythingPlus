@@ -25,7 +25,7 @@ public class FileScanImpl implements FileScan {
     public void index(String path) {
         File file = new File(path);
 
-        //文件
+        //文件F
         if(file.isFile()) {
             if(config.getExcludePath().contains(file.getParent())) {
                 return ;
@@ -50,7 +50,5 @@ public class FileScanImpl implements FileScan {
     public void interceptor(FileInterceptor interceptor) {
         this.interceptors.add(interceptor);
     }
-
-
 
 }

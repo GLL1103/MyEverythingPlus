@@ -24,7 +24,10 @@ public class FileSearchImpl implements FileSearch {
 
     @Override
     public List<Thing> search(Condition condition) {
+        if(condition == null)
+            return null;
+
         //数据库的处理逻辑
-        return fileIndexDao.search(condition);
+        return this.fileIndexDao.search(condition);
     }
 }
