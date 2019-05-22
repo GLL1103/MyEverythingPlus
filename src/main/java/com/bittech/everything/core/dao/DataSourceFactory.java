@@ -32,6 +32,9 @@ public class DataSourceFactory {
                     //JDBC规范中关于H2  jdbc:h2:~/filepath  -> 存储到当前用户的home目录
                     //JDBC规范中关于H2  jdbc:h2://ip:port/databaseName  -> 存储到服务器
                     dataSource.setUrl("jdbc:h2:"+MyEverythingPlusConfig.getInstance().getH2IndexPath());
+
+                    //Druid数据库连接池的可配置参数
+                    dataSource.setValidationQuery("select now()");
                 }
             }
         }

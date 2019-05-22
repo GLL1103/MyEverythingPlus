@@ -12,4 +12,6 @@ public interface FileIndexDao {
     void insert(Thing thing);
     //查找
     List<Thing> search(Condition condition);
+    //删除
+    void delete(Thing thing);
 }

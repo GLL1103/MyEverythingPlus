@@ -1,5 +1,6 @@
 package com.bittech.everything.cmd;
 
+import com.bittech.everything.config.MyEverythingPlusConfig;
 import com.bittech.everything.core.MyEverythingPlusManager;
 import com.bittech.everything.core.model.Condition;
 import com.bittech.everything.core.model.Thing;
@@ -13,14 +14,84 @@ public class MyEverythingPlusCmdApp {
 
     public static void main(String[] args) {
 
+        //处理参数     用户可配置
+        parseParams(args);
+
         //欢迎
         welcome();
 
         //统一调度器
         MyEverythingPlusManager manager = MyEverythingPlusManager.getInstance();
 
+        //启动清理线程
+        manager.startBackgroundClearThread();
+
         //交互式
         interactive(manager);
+    }
+
+    private static void parseParams(String[] args) {
+        MyEverythingPlusConfig config = MyEverythingPlusConfig.getInstance();
+
+        /**
+         * 处理参数
+         * 如果用户指定的参数格式不对，使用默认值
+         */
+        for(String param : args) {
+            String maxReturnParam = "--maxReturn=";
+            if(param.startsWith(maxReturnParam)) {
+                //--maxReturn=values
+                int index = param.indexOf("=");
+                String maxReturnStr = param.substring(index+1);
+                try{
+                    int maxReturn = Integer.parseInt(maxReturnStr);
+                    config.setMaxReturn(maxReturn);
+                }catch (NumberFormatException e){
+                    //格式错误，不做处理，使用默认值
+                }
+            }
+
+            String depthOrderByAscParam = "--depthOrderByAsc=";
+            if(param.startsWith(depthOrderByAscParam)) {
+                //--depthOrderByAsc=values
+                int index = param.indexOf("=");
+                String depthOrderByAsc = param.substring(index+1);
+                //当传入字符串为空时，返回false
+                config.setDepthOrderByAsc(Boolean.parseBoolean(depthOrderByAsc));
+            }
+
+            String includePathParam = "--includePath=";
+            if(param.startsWith(includePathParam)) {
+                //--includePath=A;B
+                int index = param.indexOf("=");
+                String includePath = param.substring(index+1);
+                String[] includePaths = includePath.split(";");
+
+                //如果为空，表示没有输入搜索路径，不清除默认搜索路径
+                if(0 < includePaths.length) {
+                    config.getIncludePath().clear();
+                }
+                for(String p : includePaths) {
+                    config.getIncludePath().add(p);
+                }
+            }
+
+            String excludePathParam = "--excludePath";
+            if(param.startsWith(excludePathParam)) {
+                //--excludePath=A;B
+                int index = param.indexOf("=");
+                String excludePath = param.substring(index+1);
+                String[] excludePaths = excludePath.split(";");
+
+                //如果为空，表示没有输入排除路径，不清除默认排除路径
+                if(0 < excludePaths.length) {
+                    config.getExcludePath().clear();
+                }
+                for(String p : excludePaths) {
+                    config.getExcludePath().add(p);
+                }
+            }
+        }
     }
 
     private static void interactive(MyEverythingPlusManager manager) {
@@ -73,9 +144,10 @@ public class MyEverythingPlusCmdApp {
     }
 
     private static void search(MyEverythingPlusManager manager,Condition condition ) {
-        System.out.println("检索功能");
         //统一调度器中的search
         //name fileType limit orderByAsc
+        condition.setLimit(MyEverythingPlusConfig.getInstance().getMaxReturn());
+        condition.setOrderByAsc(MyEverythingPlusConfig.getInstance().getDepthOrderByAsc());
         List<Thing> things = manager.search(condition);
         for(Thing thing : things) {
             System.out.println(thing.getPath());

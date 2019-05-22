@@ -8,6 +8,7 @@ import com.bittech.everything.core.index.FileScan;
 import com.bittech.everything.core.index.impl.FileScanImpl;
 import com.bittech.everything.core.interceptor.impl.FileIndexInterceptor;
 import com.bittech.everything.core.interceptor.impl.FilePrintInterceptor;
+import com.bittech.everything.core.interceptor.impl.ThingClearInterceptor;
 import com.bittech.everything.core.model.Condition;
 import com.bittech.everything.core.model.Thing;
 import com.bittech.everything.core.search.FileSearch;
@@ -21,7 +22,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class MyEverythingPlusManager {
 
@@ -30,6 +33,12 @@ public class MyEverythingPlusManager {
     private FileSearch fileSearch;
     private FileScan fileScan;
     private ExecutorService executorService;
+
+    //清理删除的文件
+    private ThingClearInterceptor thingClearInterceptor;
+    private Thread backgroundClearThread;
+
+    private AtomicBoolean backgroundClearThreadStatus = new AtomicBoolean(false);
 
 
     private MyEverythingPlusManager() {
@@ -49,15 +58,14 @@ public class MyEverythingPlusManager {
         //为了检查程序效果
         //this.fileScan.interceptor(new FilePrintInterceptor());
         this.fileScan.interceptor(new FileIndexInterceptor(fileIndexDao));
+
+        this.thingClearInterceptor = new ThingClearInterceptor(fileIndexDao);
+        this.backgroundClearThread = new Thread(this.thingClearInterceptor);
+        this.backgroundClearThread.setName("Thread-Clear");
+        //将清理线程设置为守护线程
+        this.backgroundClearThread.setDaemon(true);
     }
 
-//    private void checkDatabase() {
-//        String fileName = MyEverythingPlusConfig.getInstance().getH2IndexPath()+".mv.db";
-//        File dbFile = new File(fileName);
-//        if(dbFile.isFile() && !dbFile.exists()) {
-//            DataSourceFactory.initDatabase();
-//        }
-//    }
     private void checkDatabase() {
         String fileName = MyEverythingPlusConfig.getInstance().getH2IndexPath() + ".mv.db";
         File dbFile = new File(fileName);
@@ -86,9 +94,20 @@ public class MyEverythingPlusManager {
 
     //检索
     public List<Thing> search(Condition condition) {
-        //NOTICE 扩展点
-        return this.fileSearch.search(condition);
+        //stream  流式处理  JDK8
+        return this.fileSearch.search(condition).stream().filter(thing -> {
+            String path = thing.getPath();
+            File f = new File(path);
+            boolean flag = f.exists();
+            if(!flag) {
+                //做删除
+                //模拟生产者消费者模型（将待删除的文件加入队列中，指定某一线程去删除）
+                thingClearInterceptor.apply(thing);
+            }
+            return flag;
+        }).collect(Collectors.toList());
     }
+
 
     //索引
     public void buildIndex() {
@@ -131,4 +150,13 @@ public class MyEverythingPlusManager {
         System.out.println("Buidl index complete ...");
     }
 
+    //启动清理线程
+    public void startBackgroundClearThread() {
+        if(this.backgroundClearThreadStatus.compareAndSet(false,true)) {
+            this.backgroundClearThread.start();
+        }
+        else {
+            System.out.println("this thread is running ...");
+        }
+    }
 }
