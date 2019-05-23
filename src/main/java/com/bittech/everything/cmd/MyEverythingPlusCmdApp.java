@@ -26,6 +26,10 @@ public class MyEverythingPlusCmdApp {
         //启动清理线程
         manager.startBackgroundClearThread();
 
+        //启动监控
+        manager.startFileSystemMonitor();
+
+
         //交互式
         interactive(manager);
     }
